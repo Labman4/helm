@@ -28,7 +28,7 @@ podAnnotations:
 #  sidecar.jaegertracing.io/inject: "true"
   linkerd.io/inject: enabled
 #  config.linkerd.io/access-log: apache
-  instrumentation.opentelemetry.io/inject-java: "true"
+#  instrumentation.opentelemetry.io/inject-java: "true"
 #  sidecar.opentelemetry.io/inject: "true"
 
 podSecurityContext: {}
