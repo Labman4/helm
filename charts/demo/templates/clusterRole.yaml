@@ -1,0 +1,30 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: demo-discovery
+  namespace: kafka
+rules:
+  - apiGroups: [""]
+    #
+    # at the HTTP level, the name of the resource for accessing Secret
+    # objects is "secrets"
+    resources: ["endpoints","services","pods"]
+    verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: demo-discover
+subjects:
+  - kind: ServiceAccount
+    name: demo # Name is case sensitive
+    namespace: kafka
+    apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: demo-discovery
+  apiGroup: ""

@@ -1,0 +1,14 @@
+{{- if .Values.configuration }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "demo.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "demo.name" . }}
+    helm.sh/chart: {{ include "demo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  application.yml: |
+  {{ toYaml .Values.configuration | indent 4}}
+  {{- end }}

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "demo.fullname" . }}-headless
+  labels:
+    {{- include "demo.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+#    - port: {{ .Values.service.port }}
+#      targetPort: {{ .Values.service.targetPort }}
+#      protocol: TCP
+#      name: https
+    - port: {{ .Values.service.httpPort }}
+      targetPort: {{ .Values.service.httpTargetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "demo.selectorLabels" . | nindent 4 }}

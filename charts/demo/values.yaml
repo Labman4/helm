@@ -1,3 +1,4 @@
+
 # Default values for demo.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -5,10 +6,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
-  pullPolicy: IfNotPresent
+  repository: registry.elpsykongroo.com/library/demo
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "0.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -21,9 +22,14 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: "demo"
 
-podAnnotations: {}
+podAnnotations:
+#  sidecar.jaegertracing.io/inject: "true"
+  linkerd.io/inject: enabled
+#  config.linkerd.io/access-log: apache
+  instrumentation.opentelemetry.io/inject-java: "true"
+#  sidecar.opentelemetry.io/inject: "true"
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -38,42 +44,141 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 443
+  targetPort: 8443
+  httpPort: 9464
+  httpTargetPort: 9464
 
 ingress:
   enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
+  className: "nginx"
+  annotations:
+#    nginx.ingress.kubernetes.io/service-upstream: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+    - host: api.elpsykongroo.com
+      paths:
+#        - path: /public(/|$)(.*)
+#          pathType: Prefix #ImplementationSpecific
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: elpsykongroo-tls
+      hosts:
+        - api.elpsykongroo.com
 
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+   limits:
+     cpu: 2048m
+     memory: 2048Mi
+   requests:
+     cpu: 1024m
+     memory: 1024Mi
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 90
+  targetMemoryUtilizationPercentage: 90
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+extraVolumes:
+  - name: truststore
+    secret:
+      secretName: jks
+      optional: false # default
+
+# Any extra volume mounts to define for the akhq container
+extraVolumeMounts:
+  - name: truststore
+    mountPath: "/var/secret"
+    readOnly: true
+#
+extraEnv:
+  - name: JKS
+    value: file:/var/secret/truststore.jks
+  - name: JKS_PASS
+    valueFrom:
+      secretKeyRef:
+        key: jks_pass
+        name: jks
+        optional: false
+  - name: ES_URL
+    value: elasticsearch-master.elastic.svc:9200
+  - name: KAFKA_URL
+    value: kafka-kafka-bootstrap.kafka.svc:9093
+  - name: ES_PASS
+    valueFrom:
+      secretKeyRef:
+        key: ES_PASSWORD
+        name: es-credentials
+        optional: false
+  - name: ES_USER
+    valueFrom:
+      secretKeyRef:
+        key: ES_USERNAME
+        name: es-credentials
+        optional: false
+  - name: MYSQL_IP
+    value: mysql-primary.mysql.svc
+  - name: REDIS_TYPE
+    value: LETTUCE
+  - name: MYSQL_PORT
+    value: "3306"
+  - name: REDIS_NODE
+    value: redis-cluster.redis.svc:6379
+  - name: REDIS_IP
+    value: redis://redis-cluster.redis.svc:6379
+  - name: REDIS_PASSWORD
+    value: elpsy4783
+  - name: MYSQL_PASSWORD
+    value: Elpsy4783
+  - name: MYSQL_USERNAME
+    value: root
+  - name: ENV
+    value: prod
+  - name: FILTER_PATH
+    value: /
+  - name: RECORD_EXCLUDE_PATH
+    value: /actuator/
+  - name: IP_HEADER
+    value: x-original-forwarded-for
+  - name: BLACK_HEADER
+    value: x-original-forwarded-for
+  - name: OC_AGENT_HOST
+    value: jaeger-collector.opentelemetry:55678
+  - name: OTEL_TRACES_EXPORTER
+    value: jaeger
+  - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+    value: http://streaming-collector.jaeger:14250
+  - name: OTEL_METRICS_EXPORTER
+    value: prometheus
+  - name: OTEL_LOGS_EXPORTER
+    value: none
+  - name: OTEL_SERVICE_NAME
+    value: demo
+  - name: OTEL_EXPORTER_PROMETHEUS_PORT
+    value: "9464"
+  - name: OTEL_EXPORTER_PROMETHEUS_HOST
+    value: 0.0.0.0
+  - name: WHITE_HEADER
+    value: x-original-forwarded-for
+  - name: PUBLIC_PATH
+    value: /public
+  - name: AUTH_URL
+    value: auth.demo
+#  - name: JAVA_TOOL_OPTIONS
+#    value: -javaagent:/workspace/BOOT-INF/classes/opentelemetry-javaagent.jar
+#  - name: JAVA_TOOL_OPTIONS
+#    value: -DspringAot=true

@@ -5,11 +5,11 @@ metadata:
   labels:
     {{- include "demo.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test-success
+    "helm.sh/hook": test
 spec:
   containers:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "demo.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "demo.fullname" . }}:{{ .Values.service.port }}/ip/']
   restartPolicy: Never
