@@ -9,7 +9,7 @@ image:
   repository: registry.elpsykongroo.com/library/demo
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.1"
+  tag: "0.0.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -28,8 +28,8 @@ podAnnotations:
 #  sidecar.jaegertracing.io/inject: "true"
   linkerd.io/inject: enabled
 #  config.linkerd.io/access-log: apache
-#  instrumentation.opentelemetry.io/inject-java: "true"
-#  sidecar.opentelemetry.io/inject: "true"
+  # instrumentation.opentelemetry.io/inject-java: "true"
+  # sidecar.opentelemetry.io/inject: "true"
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -81,7 +81,7 @@ resources:
      memory: 1024Mi
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationPercentage: 90
@@ -178,7 +178,7 @@ extraEnv:
     value: /public
   - name: AUTH_URL
     value: auth.demo
-#  - name: JAVA_TOOL_OPTIONS
-#    value: -javaagent:/workspace/BOOT-INF/classes/opentelemetry-javaagent.jar
+  - name: JAVA_TOOL_OPTIONS
+    value: -javaagent:/otel-auto-instrumentation/javaagent.jar
 #  - name: JAVA_TOOL_OPTIONS
 #    value: -DspringAot=true
