@@ -13,6 +13,16 @@ entries:
     version: 0.1.0
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2022-12-13T19:35:58.383664251Z"
+    description: demo
+    digest: 16cf4d943d24a7abee1f4b07be9b274540b55b06639b03ce4baa78356456eb9f
+    name: demo
+    type: application
+    urls:
+    - https://github.com/Labman4/helm/releases/download/demo-0.0.2/demo-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2022-12-12T00:47:21.480778284Z"
     description: demo
     digest: 78616089ab38fcb2919f0736d8835cbe9047397f9b7c52e316d8a9bb916d3b70
@@ -110,4 +120,4 @@ entries:
     urls:
     - https://github.com/Labman4/helm/releases/download/kube-prometheus-stack-40.1.0/kube-prometheus-stack-40.1.0.tgz
     version: 40.1.0
-generated: "2022-12-12T02:56:00.130898625Z"
+generated: "2022-12-13T19:35:58.383679951Z"
