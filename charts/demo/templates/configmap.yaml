@@ -11,4 +11,4 @@ metadata:
 data:
   application.yml: |
   {{ toYaml .Values.configuration | indent 4}}
-  {{- end }}
+{{- end }}

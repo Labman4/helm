@@ -1,3 +1,4 @@
+{{- if .Values.service.headless.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,13 +9,10 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-#    - port: {{ .Values.service.port }}
-#      targetPort: {{ .Values.service.targetPort }}
-#      protocol: TCP
-#      name: https
-    - port: {{ .Values.service.httpPort }}
-      targetPort: {{ .Values.service.httpTargetPort }}
+    - port: {{ .Values.service.headless.port }}
+      targetPort: {{ .Values.service.headless.targetPort }}
       protocol: TCP
       name: http
   selector:
     {{- include "demo.selectorLabels" . | nindent 4 }}
+{{- end}}

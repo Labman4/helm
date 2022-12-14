@@ -25,11 +25,13 @@ serviceAccount:
   name: "demo"
 
 podAnnotations:
-#  sidecar.jaegertracing.io/inject: "true"
+  instrumentation.opentelemetry.io/inject-java: "true" # default first container
+  instrumentation.opentelemetry.io/container-names: "demo" # must defined with linkerd
   linkerd.io/inject: enabled
-#  config.linkerd.io/access-log: apache
-  # instrumentation.opentelemetry.io/inject-java: "true"
-  # sidecar.opentelemetry.io/inject: "true"
+  # config.linkerd.io/access-log: apache
+  # sidecar.opentelemetry.io/inject: "true"  #otel-collector
+  # sidecar.jaegertracing.io/inject: "true"  #jaeger-agent collector
+
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -46,8 +48,10 @@ service:
   type: ClusterIP
   port: 443
   targetPort: 8443
-  httpPort: 9464
-  httpTargetPort: 9464
+  headless:
+    enable: false
+    port: 9464
+    targetPort: 9464
 
 ingress:
   enabled: false
@@ -81,7 +85,7 @@ resources:
      memory: 1024Mi
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationPercentage: 90
@@ -156,8 +160,9 @@ extraEnv:
     value: x-original-forwarded-for
   - name: BLACK_HEADER
     value: x-original-forwarded-for
-  - name: OC_AGENT_HOST
-    value: jaeger-collector.opentelemetry:55678
+  # need imlpentment b3 client
+  # - name: OC_AGENT_HOST
+  #   value: jaeger-collector.opentelemetry:55678
   - name: OTEL_TRACES_EXPORTER
     value: jaeger
   - name: OTEL_EXPORTER_JAEGER_ENDPOINT
@@ -168,10 +173,11 @@ extraEnv:
     value: none
   - name: OTEL_SERVICE_NAME
     value: demo
-  - name: OTEL_EXPORTER_PROMETHEUS_PORT
-    value: "9464"
-  - name: OTEL_EXPORTER_PROMETHEUS_HOST
-    value: 0.0.0.0
+  #  use actuator/prometheus endpoint instead
+  # - name: OTEL_EXPORTER_PROMETHEUS_PORT
+  #   value: "9464"
+  # - name: OTEL_EXPORTER_PROMETHEUS_HOST
+  #   value: 0.0.0.0
   - name: WHITE_HEADER
     value: x-original-forwarded-for
   - name: PUBLIC_PATH
